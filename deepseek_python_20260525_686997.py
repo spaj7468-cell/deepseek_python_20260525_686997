@@ -1,13 +1,14 @@
 import asyncio
 import random
 import json
+import os
 from datetime import datetime, timedelta
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 # -------------------- НАСТРОЙКИ --------------------
-BOT_TOKEN = "ТВОЙ_ТОКЕН_СЮДА"
+BOT_TOKEN = os.getenv("BOT_TOKEN", "").strip()
 
 # -------------------- ДАННЫЕ --------------------
 CARS = {
@@ -45,7 +46,7 @@ def load_users():
     try:
         with open("storm_users.json", "r", encoding="utf-8") as f:
             users = {int(k): v for k, v in json.load(f).items()}
-    except:
+    except (OSError, json.JSONDecodeError, TypeError, ValueError):
         users = {}
 
 def save_users():
@@ -110,7 +111,10 @@ def storm_car_keyboard(user_data):
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 # -------------------- БОТ --------------------
-bot = Bot(token=8922851436:AAFM-L00bk1NP772dWVGuDA3sZyVDEJLn3U)
+if not BOT_TOKEN:
+    raise RuntimeError("Укажи BOT_TOKEN в переменных окружения.")
+
+bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
 @dp.message(Command("start"))
